@@ -1,0 +1,17 @@
+sudo: required
+services:
+  - docker
+before_install:
+  - docker build -t omrip37/react-test -f ./client/Dockerfile.dev ./client
+script:
+  - docker run -e CI=true omrip37/react-test npm test
+after_success:
+  - docker build -t omrip37/multi-client ./client
+  - docker build -t omrip37/multi-nginx  ./nginx
+  - docker build -t omrip37/multi-server ./server
+  - docker build -t omrip37/multi-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push omrip37/multi-client
+  - docker push omrip37/multi-nginx
+  - docker push omrip37/multi-server
+  - docker push omrip37/multi-worker
